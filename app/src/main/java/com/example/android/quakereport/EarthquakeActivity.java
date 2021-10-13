@@ -55,27 +55,29 @@ public class EarthquakeActivity extends AppCompatActivity {
 
 
         ArrayList<news> earthquakes = new ArrayList<>();
+        ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2014-01-01&endtime=2014-01-02&limit=10";
+        String url = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2014-01-01&endtime=2014-03-02&limit=10&minmagnitude=5";
 
-        // Request a string response from the provided URL.
-        JsonObjectRequest JSONRequest = new JsonObjectRequest(Request.Method.GET, url,null,
+        // Request a JSONObject response from the provided URL.
+        JsonObjectRequest JSONRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        JSONArray features;
+                        JSONObject feature, properties;
                         try {
-                            if (response != null) {
-                                JSONArray features = response.optJSONArray("features");
-                                for (int i = 0; i < features.length(); i++) {
-                                    JSONObject feature = features.getJSONObject(i);
-                                    JSONObject properties = feature.getJSONObject("properties");
-                                    long timeinMilliseconds = properties.optInt("time");
-                                    //earthquakes is a java class for storing data
-                                    earthquakes.add(new news(properties.optString("place"), properties.optDouble("mag"), timeinMilliseconds, properties.optString("url")));
-                                }
+                            features = response.optJSONArray("features");
+                            for (int i = 0; i < features.length(); i++) {
+                                feature = features.getJSONObject(i);
+                                properties = feature.getJSONObject("properties");
+                                long timeinMilliseconds = properties.optInt("time");
+                                earthquakes.add(new news(properties.optString("place"), properties.optDouble("mag"), timeinMilliseconds, properties.optString("url")));
                             }
+                            Adapter adapter = new Adapter(getApplicationContext(), R.layout.earthquake_layout, earthquakes);
+                            earthquakeListView.setAdapter(adapter);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -83,18 +85,14 @@ public class EarthquakeActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
             }
         });
+
         // Add the request to the RequestQueue.
         queue.add(JSONRequest);
 
-
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
-
-        Adapter adapter = new Adapter(this, R.layout.earthquake_layout, earthquakes);
-
-        earthquakeListView.setAdapter(adapter);
-
+        //on itemlistener for list view
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

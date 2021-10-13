@@ -36,6 +36,7 @@ public class Adapter extends ArrayAdapter<news> {
 
         TextView currentplace = (TextView) currentview.findViewById(R.id.place);
         String place = currentquake.getPlace();
+        //spliting received place into two halves for better readability
         if (place.contains(" of ")) {
             String[] parts = place.split(" of ");
             currentplace.setText(parts[0] + " of" + "\n" + parts[1]);
@@ -66,6 +67,7 @@ public class Adapter extends ArrayAdapter<news> {
 
         return currentview;
     }
+    //different color coding for different magnitudes
     public int getcolor(Double magnitude)
     {
         int magnitudeColorResourceId;
@@ -73,7 +75,7 @@ public class Adapter extends ArrayAdapter<news> {
         switch(magnitudeFloor)
         {
             case 0:
-                magnitudeColorResourceId=android.R.color.white;
+                magnitudeColorResourceId= android.R.color.darker_gray;
                 break;
             case 1:
                 magnitudeColorResourceId=R.color.magnitude1;
